@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="maven-antrun-" default="main">
+  <target name="main">
+    <copy todir="/Users/vladkiselev06/Desktop/Учеба/ООТПиСП/3lab/library-bson/plugins-dist" overwrite="true">
+      <fileset dir="/Users/vladkiselev06/Desktop/Учеба/ООТПиСП/3lab/library-bson/target">
+        <include name="library-bson-plugin-videolecture.jar" />
+        <include name="library-bson-plugin-processors.jar" />
+        <include name="library-bson-plugin-legacy.jar" />
+      </fileset>
+      <mapper type="flatten" />
+    </copy>
+  </target>
+</project>

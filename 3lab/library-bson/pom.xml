@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.library</groupId>
+    <artifactId>library-bson</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <!-- Zero external dependencies: custom BSON implementation included -->
+
+    <build>
+        <plugins>
+            <!-- Compile as usual, then additionally build external plugin JARs for demo -->
+            <!-- Prepare staging folders with only the needed classes/resources for each plugin JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>stage-plugin-jars</id>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <target>
+                                <mkdir dir="${project.build.directory}/plugin-videolecture-classes"/>
+                                <mkdir dir="${project.build.directory}/plugin-processors-classes"/>
+                                <mkdir dir="${project.build.directory}/plugin-legacy-classes"/>
+                                <mkdir dir="${project.basedir}/plugins-dist"/>
+
+                                <!-- VideoLecture plugin -->
+                                <copy todir="${project.build.directory}/plugin-videolecture-classes" overwrite="true">
+                                    <fileset dir="${project.build.outputDirectory}">
+                                        <include name="com/library/plugin/VideoLecturePlugin.class"/>
+                                        <include name="com/library/model/VideoLecture.class"/>
+                                    </fileset>
+                                </copy>
+                                <copy todir="${project.build.directory}/plugin-videolecture-classes" overwrite="true">
+                                    <fileset dir="${project.basedir}/src/plugin-services/videolecture">
+                                        <include name="**/*"/>
+                                    </fileset>
+                                </copy>
+
+                                <!-- Processing plugins -->
+                                <copy todir="${project.build.directory}/plugin-processors-classes" overwrite="true">
+                                    <fileset dir="${project.build.outputDirectory}">
+                                        <include name="com/library/plugin/builtin/*.class"/>
+                                    </fileset>
+                                </copy>
+                                <copy todir="${project.build.directory}/plugin-processors-classes" overwrite="true">
+                                    <fileset dir="${project.basedir}/src/plugin-services/processors">
+                                        <include name="**/*"/>
+                                    </fileset>
+                                </copy>
+
+                                <!-- Legacy plugin -->
+                                <copy todir="${project.build.directory}/plugin-legacy-classes" overwrite="true">
+                                    <fileset dir="${project.build.outputDirectory}">
+                                        <include name="com/library/legacy/example/*.class"/>
+                                    </fileset>
+                                </copy>
+                                <copy todir="${project.build.directory}/plugin-legacy-classes" overwrite="true">
+                                    <fileset dir="${project.basedir}/src/plugin-services/legacy">
+                                        <include name="**/*"/>
+                                    </fileset>
+                                </copy>
+                            </target>
+                        </configuration>
+                        <goals><goal>run</goal></goals>
+                    </execution>
+
+                    <execution>
+                        <id>copy-plugin-jars</id>
+                        <phase>verify</phase>
+                        <configuration>
+                            <target>
+                                <copy todir="${project.basedir}/plugins-dist" overwrite="true">
+                                    <fileset dir="${project.build.directory}">
+                                        <include name="library-bson-plugin-videolecture.jar"/>
+                                        <include name="library-bson-plugin-processors.jar"/>
+                                        <include name="library-bson-plugin-legacy.jar"/>
+                                    </fileset>
+                                    <mapper type="flatten"/>
+                                </copy>
+                            </target>
+                        </configuration>
+                        <goals><goal>run</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.library.ui.MainApp</mainClass>
+                        </manifest>
+                    </archive>
+                    <finalName>library-bson</finalName>
+                </configuration>
+                <executions>
+                    <!-- External plugin JAR: item type VideoLecture -->
+                    <execution>
+                        <id>jar-videolecture-plugin</id>
+                        <phase>package</phase>
+                        <goals><goal>jar</goal></goals>
+                        <configuration>
+                            <classifier>plugin-videolecture</classifier>
+                            <classesDirectory>${project.build.directory}/plugin-videolecture-classes</classesDirectory>
+                        </configuration>
+                    </execution>
+
+                    <!-- External plugin JAR: processing plugins (lab #5) -->
+                    <execution>
+                        <id>jar-processing-plugins</id>
+                        <phase>package</phase>
+                        <goals><goal>jar</goal></goals>
+                        <configuration>
+                            <classifier>plugin-processors</classifier>
+                            <classesDirectory>${project.build.directory}/plugin-processors-classes</classesDirectory>
+                        </configuration>
+                    </execution>
+
+                    <!-- External plugin JAR: legacy processor plugin (lab #6 adapter) -->
+                    <execution>
+                        <id>jar-legacy-plugin</id>
+                        <phase>package</phase>
+                        <goals><goal>jar</goal></goals>
+                        <configuration>
+                            <classifier>plugin-legacy</classifier>
+                            <classesDirectory>${project.build.directory}/plugin-legacy-classes</classesDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+</project>

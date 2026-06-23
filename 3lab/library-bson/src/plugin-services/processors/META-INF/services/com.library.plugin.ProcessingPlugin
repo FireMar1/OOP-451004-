@@ -1,0 +1,5 @@
+com.library.plugin.builtin.TrimTextProcessor
+com.library.plugin.builtin.SortByTitleProcessor
+com.library.plugin.builtin.UppercaseTitlesProcessor
+com.library.plugin.builtin.XmlToJsonVariantProcessor
+
